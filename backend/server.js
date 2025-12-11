@@ -1,21 +1,17 @@
-// server.js - Backend для игры Крестики-нолики
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Конфигурация Telegram бота (из переменных окружения)
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
 
-// Генерация промокода
 function generatePromoCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -25,7 +21,6 @@ function generatePromoCode() {
   return code;
 }
 
-// Отправка сообщения в Telegram
 async function sendTelegramMessage(message) {
   if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
     console.error('Telegram credentials not configured');
@@ -49,9 +44,6 @@ async function sendTelegramMessage(message) {
   }
 }
 
-// API Routes
-
-// Проверка работы сервера
 app.get('/', (req, res) => {
   res.json({ 
     status: 'ok', 
@@ -60,13 +52,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// Генерация промокода
 app.post('/api/generate-promo', (req, res) => {
   const promoCode = generatePromoCode();
   res.json({ promoCode });
 });
 
-// Отправка уведомления о победе
 app.post('/api/game/win', async (req, res) => {
   const { promoCode } = req.body;
   
@@ -80,7 +70,6 @@ app.post('/api/game/win', async (req, res) => {
   res.json(result);
 });
 
-// Отправка уведомления о проигрыше
 app.post('/api/game/lose', async (req, res) => {
   const message = '😔 <b>Проигрыш</b>';
   const result = await sendTelegramMessage(message);
@@ -88,7 +77,6 @@ app.post('/api/game/lose', async (req, res) => {
   res.json(result);
 });
 
-// Отправка уведомления о ничьей
 app.post('/api/game/draw', async (req, res) => {
   const message = '🤝 <b>Ничья</b>';
   const result = await sendTelegramMessage(message);
@@ -96,7 +84,6 @@ app.post('/api/game/draw', async (req, res) => {
   res.json(result);
 });
 
-// Обработка всех игровых событий одним эндпоинтом
 app.post('/api/game/result', async (req, res) => {
   const { result, promoCode } = req.body;
   
@@ -123,7 +110,6 @@ app.post('/api/game/result', async (req, res) => {
   res.json(telegramResult);
 });
 
-// Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Bot configured: ${!!(BOT_TOKEN && ADMIN_CHAT_ID)}`);
