@@ -1,0 +1,201 @@
+/* Container */
+.tic-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #ffe0f0, #f0e5ff, #e0f0ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  font-family: sans-serif;
+}
+
+.tic-wrapper {
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Header */
+.tic-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.tic-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tic-title h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(to right, #ff5fa1, #9b5fe0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sparkle {
+  width: 32px;
+  height: 32px;
+  color: #d67fff;
+}
+
+/* Board */
+.tic-board-container {
+  background: rgba(255,255,255,0.9);
+  border-radius: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 2rem;
+}
+
+.tic-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.tic-cell {
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom right, #f0f0f0, #fafafa);
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.tic-cell:hover {
+  transform: scale(1.05);
+}
+
+.tic-cell.filled-X {
+  background: linear-gradient(to bottom right, #ff7fa1, #ff5fa1);
+  color: white;
+  box-shadow: 0 5px 15px rgba(255,95,161,0.5);
+}
+
+.tic-cell.filled-O {
+  background: linear-gradient(to bottom right, #9b5fe0, #7f3ff2);
+  color: white;
+  box-shadow: 0 5px 15px rgba(155,95,224,0.5);
+}
+
+.heart-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* Controls */
+.tic-controls {
+  text-align: center;
+}
+
+.reset-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(to right, #ff7fa1, #9b5fe0);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  transform: scale(1.05);
+}
+
+.reset-button .icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Tip */
+.tic-tip {
+  margin-top: 1.5rem;
+  background: rgba(255,255,255,0.8);
+  padding: 1rem;
+  border-radius: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 2rem;
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.trophy {
+  width: 80px;
+  height: 80px;
+  color: #ffdd57;
+  margin: 0 auto 1rem;
+}
+
+.promo-code {
+  background: linear-gradient(to right, #ffe0f0, #e0d4ff);
+  border: 2px solid #9b5fe0;
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #9b5fe0;
+  margin: 1rem 0;
+}
+
+.promo-sent {
+  background: #e0f7e9;
+  color: #2f855a;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-button {
+  width: 100%;
+  background: linear-gradient(to right, #ff7fa1, #9b5fe0);
+  color: white;
+  font-weight: bold;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-button:hover {
+  transform: scale(1.05);
+}
+
+.emoji {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
