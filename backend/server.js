@@ -10,7 +10,11 @@ app.use(cors());
 app.use(express.json());
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
+
+if (!BOT_TOKEN) {
+  console.error('Telegram bot token is missing in .env');
+  process.exit(1);
+}
 
 function generatePromoCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -21,22 +25,17 @@ function generatePromoCode() {
   return code;
 }
 
-async function sendTelegramMessage(message) {
-  if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
-    console.error('Telegram credentials not configured');
-    return { success: false, error: 'Bot not configured' };
-  }
-
+async function sendTelegramMessage(chatId, message) {
   try {
     const response = await axios.post(
       `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
       {
-        chat_id: ADMIN_CHAT_ID,
+        chat_id: chatId,
         text: message,
         parse_mode: 'HTML'
       }
     );
-    
+
     return { success: true, data: response.data };
   } catch (error) {
     console.error('Error sending Telegram message:', error.message);
@@ -45,11 +44,7 @@ async function sendTelegramMessage(message) {
 }
 
 app.get('/', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'Tic-Tac-Toe Backend API',
-    botConfigured: !!(BOT_TOKEN && ADMIN_CHAT_ID)
-  });
+  res.json({ status: 'ok', message: 'Tic-Tac-Toe Backend API', botConfigured: !!BOT_TOKEN });
 });
 
 app.post('/api/generate-promo', (req, res) => {
@@ -57,43 +52,17 @@ app.post('/api/generate-promo', (req, res) => {
   res.json({ promoCode });
 });
 
-app.post('/api/game/win', async (req, res) => {
-  const { promoCode } = req.body;
-  
-  if (!promoCode) {
-    return res.status(400).json({ error: 'Promo code is required' });
+app.post('/api/game/result', async (req, res) => {
+  const { result, promoCode, chatId } = req.body;
+
+  if (!chatId) {
+    return res.status(400).json({ error: 'chatId is required' });
   }
 
-  const message = `🎉 <b>Победа!</b>\nПромокод выдан: <code>${promoCode}</code>`;
-  const result = await sendTelegramMessage(message);
-  
-  res.json(result);
-});
-
-app.post('/api/game/lose', async (req, res) => {
-  const message = '😔 <b>Проигрыш</b>';
-  const result = await sendTelegramMessage(message);
-  
-  res.json(result);
-});
-
-app.post('/api/game/draw', async (req, res) => {
-  const message = '🤝 <b>Ничья</b>';
-  const result = await sendTelegramMessage(message);
-  
-  res.json(result);
-});
-
-app.post('/api/game/result', async (req, res) => {
-  const { result, promoCode } = req.body;
-  
   let message = '';
-  
   switch(result) {
     case 'win':
-      if (!promoCode) {
-        return res.status(400).json({ error: 'Promo code required for win' });
-      }
+      if (!promoCode) return res.status(400).json({ error: 'Promo code required for win' });
       message = `🎉 <b>Победа!</b>\nПромокод выдан: <code>${promoCode}</code>`;
       break;
     case 'lose':
@@ -105,12 +74,12 @@ app.post('/api/game/result', async (req, res) => {
     default:
       return res.status(400).json({ error: 'Invalid result type' });
   }
-  
-  const telegramResult = await sendTelegramMessage(message);
+
+  const telegramResult = await sendTelegramMessage(chatId, message);
   res.json(telegramResult);
 });
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Bot configured: ${!!(BOT_TOKEN && ADMIN_CHAT_ID)}`);
+  console.log(`Bot configured: ${!!BOT_TOKEN}`);
 });
