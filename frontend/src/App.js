@@ -24,7 +24,7 @@ const TicTacToe = () => {
     if (!chatId) return;
 
     try {
-      const response = await fetch('http://localhost:3005/api/game/result', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/game/result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ result, promoCode, chatId })
