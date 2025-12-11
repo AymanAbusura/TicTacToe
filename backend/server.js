@@ -25,6 +25,31 @@ function generatePromoCode() {
   return code;
 }
 
+// Test if the bot can message this chatId
+app.post('/api/test-chat', async (req, res) => {
+  const { chatId } = req.body;
+
+  if (!chatId) {
+    return res.status(400).json({ success: false, error: 'chatId is required' });
+  }
+
+  try {
+    const response = await axios.post(
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      {
+        chat_id: chatId,
+        text: "👋 Hello! Please send /start to the bot to receive game notifications."
+      }
+    );
+
+    res.json({ success: true, data: response.data });
+  } catch (error) {
+    console.error('Error testing chatId:', error.message);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+
 async function sendTelegramMessage(chatId, message) {
   try {
     const response = await axios.post(
