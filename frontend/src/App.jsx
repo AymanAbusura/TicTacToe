@@ -192,6 +192,19 @@ const TicTacToe = () => {
             </div>
             
             <div className="info-box">
+              <p className="info-title">
+                Присоединитесь к нашему боту: 
+                <strong>
+                  <a 
+                    href="https://t.me/ResultTicTacToe_bot" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bot-link"
+                  >
+                    @ResultTicTacToe_bot
+                  </a>
+                </strong>
+              </p>
               <p className="info-title">Как получить Chat ID:</p>
               <ol className="info-list">
                 <li>Найдите свой Chat ID через @userinfobot</li>
