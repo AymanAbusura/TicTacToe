@@ -25,31 +25,6 @@ function generatePromoCode() {
   return code;
 }
 
-// Test if the bot can message this chatId
-app.post('/api/test-chat', async (req, res) => {
-  const { chatId } = req.body;
-
-  if (!chatId) {
-    return res.status(400).json({ success: false, error: 'chatId is required' });
-  }
-
-  try {
-    const response = await axios.post(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-      {
-        chat_id: chatId,
-        text: "👋 Hello! Please send /start to the bot to receive game notifications."
-      }
-    );
-
-    res.json({ success: true, data: response.data });
-  } catch (error) {
-    console.error('Error testing chatId:', error.message);
-    res.json({ success: false, error: error.message });
-  }
-});
-
-
 async function sendTelegramMessage(chatId, message) {
   try {
     const response = await axios.post(
@@ -60,7 +35,6 @@ async function sendTelegramMessage(chatId, message) {
         parse_mode: 'HTML'
       }
     );
-
     return { success: true, data: response.data };
   } catch (error) {
     console.error('Error sending Telegram message:', error.message);
@@ -70,6 +44,18 @@ async function sendTelegramMessage(chatId, message) {
 
 app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'Tic-Tac-Toe Backend API', botConfigured: !!BOT_TOKEN });
+});
+
+app.post('/api/test-chat', async (req, res) => {
+  const { chatId } = req.body;
+  if (!chatId) return res.status(400).json({ success: false, error: 'chatId is required' });
+
+  try {
+    const result = await sendTelegramMessage(chatId, "👋 Пожалуйста, отправьте /start нашему боту для получения промокодов.");
+    res.json(result);
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
 });
 
 app.post('/api/generate-promo', (req, res) => {
