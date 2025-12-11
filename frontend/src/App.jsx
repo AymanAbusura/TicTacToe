@@ -34,7 +34,7 @@ const TicTacToe = () => {
     setVerificationError('');
 
     try {
-      const API_URL = 'http://localhost:3005';
+      const API_URL = process.env.REACT_APP_API_URL;
       
       const response = await fetch(`${API_URL}/api/verify-code`, {
         method: 'POST',
@@ -64,7 +64,7 @@ const TicTacToe = () => {
     if (!userCode) return;
 
     try {
-      const API_URL = 'http://localhost:3005';
+      const API_URL = process.env.REACT_APP_API_URL;
       
       const response = await fetch(`${API_URL}/api/game/result`, {
         method: 'POST',
