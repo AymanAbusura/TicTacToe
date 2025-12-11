@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
 
 function generatePromoCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -21,22 +20,22 @@ function generatePromoCode() {
   return code;
 }
 
-async function sendTelegramMessage(message) {
-  if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
-    console.error('Telegram credentials not configured');
-    return { success: false, error: 'Bot not configured' };
+async function sendTelegramMessage(message, chatId) {
+  if (!BOT_TOKEN || !chatId) {
+    console.error('Telegram credentials not configured or chatId missing');
+    return { success: false, error: 'Bot not configured or chatId missing' };
   }
 
   try {
     const response = await axios.post(
       `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
       {
-        chat_id: ADMIN_CHAT_ID,
+        chat_id: chatId,
         text: message,
         parse_mode: 'HTML'
       }
     );
-    
+
     return { success: true, data: response.data };
   } catch (error) {
     console.error('Error sending Telegram message:', error.message);
@@ -85,10 +84,14 @@ app.post('/api/game/draw', async (req, res) => {
 });
 
 app.post('/api/game/result', async (req, res) => {
-  const { result, promoCode } = req.body;
-  
+  const { result, promoCode, chatId } = req.body;
+
+  if (!chatId) {
+    return res.status(400).json({ error: 'chatId is required' });
+  }
+
   let message = '';
-  
+
   switch(result) {
     case 'win':
       if (!promoCode) {
@@ -105,8 +108,8 @@ app.post('/api/game/result', async (req, res) => {
     default:
       return res.status(400).json({ error: 'Invalid result type' });
   }
-  
-  const telegramResult = await sendTelegramMessage(message);
+
+  const telegramResult = await sendTelegramMessage(message, chatId);
   res.json(telegramResult);
 });
 
