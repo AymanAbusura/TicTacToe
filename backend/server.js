@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
   res.json({ 
     status: 'ok', 
     message: 'Tic-Tac-Toe Backend API',
-    botConfigured: !!(BOT_TOKEN && ADMIN_CHAT_ID)
+    botConfigured: !!(BOT_TOKEN)
   });
 });
 
