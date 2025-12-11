@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const TelegramBot = require('node-telegram-bot-api');
+const { Telegraf } = require('telegraf');
 require('dotenv').config();
 
 const app = express();
@@ -11,9 +11,11 @@ app.use(cors());
 app.use(express.json());
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+const bot = new Telegraf(BOT_TOKEN);
 
 const userCodes = new Map();
+
+// -------------------- CODE GENERATORS --------------------
 
 function generateUserCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -27,6 +29,7 @@ function generateUserCode() {
   
   return code;
 }
+
 function generatePromoCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -36,6 +39,8 @@ function generatePromoCode() {
   return code;
 }
 
+// -------------------- TELEGRAM MESSAGE SENDER --------------------
+
 async function sendTelegramMessage(message, chatId) {
   if (!BOT_TOKEN || !chatId) {
     console.error('Telegram credentials not configured or chatId missing');
@@ -43,25 +48,26 @@ async function sendTelegramMessage(message, chatId) {
   }
 
   try {
-    const response = await bot.sendMessage(chatId, message, {
+    await bot.telegram.sendMessage(chatId, message, {
       parse_mode: 'HTML'
     });
 
-    return { success: true, data: response };
+    return { success: true };
   } catch (error) {
     console.error('Error sending Telegram message:', error.message);
     return { success: false, error: error.message };
   }
 }
 
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  const userName = msg.from.first_name || 'Пользователь';
-  
+// -------------------- /start HANDLER --------------------
+
+bot.start((ctx) => {
+  const chatId = ctx.chat.id;
+  const userName = ctx.from.first_name || 'Пользователь';
+
   const userCode = generateUserCode();
-  
   userCodes.set(userCode, chatId);
-  
+
   const welcomeMessage = `
 Привет, ${userName}! 👋
 
@@ -80,49 +86,51 @@ bot.onText(/\/start/, (msg) => {
 
 Удачи! 💪✨
   `.trim();
-  
-  bot.sendMessage(chatId, welcomeMessage, { parse_mode: 'HTML' });
-  
+
+  ctx.reply(welcomeMessage, { parse_mode: 'HTML' });
+
   console.log(`Generated code ${userCode} for chat ${chatId}`);
 });
 
+// -------------------- EXPRESS API --------------------
+
 app.get('/', (req, res) => {
   res.json({ 
-    status: 'ok', 
+    status: 'ok',
     message: 'Tic-Tac-Toe Backend API',
-    botConfigured: !!(BOT_TOKEN),
+    botConfigured: !!BOT_TOKEN,
     activeCodes: userCodes.size
   });
 });
 
 app.post('/api/verify-code', (req, res) => {
   const { code } = req.body;
-  
+
   if (!code) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Код не указан' 
+    return res.status(400).json({
+      success: false,
+      error: 'Код не указан'
     });
   }
-  
+
   const upperCode = code.toUpperCase();
-  
+
   if (userCodes.has(upperCode)) {
     const chatId = userCodes.get(upperCode);
-    
+
     sendTelegramMessage(
       '✅ <b>Подключение успешно!</b>\n\nВы можете начать играть. Удачи! 🎮',
       chatId
     );
-    
-    return res.json({ 
-      success: true, 
-      message: 'Код подтвержден' 
+
+    return res.json({
+      success: true,
+      message: 'Код подтвержден'
     });
   } else {
-    return res.json({ 
-      success: false, 
-      error: 'Неверный код. Отправьте /start боту для получения нового кода.' 
+    return res.json({
+      success: false,
+      error: 'Неверный код. Отправьте /start боту для получения нового кода.'
     });
   }
 });
@@ -133,29 +141,32 @@ app.post('/api/game/result', async (req, res) => {
   if (!userCode) {
     return res.status(400).json({ error: 'userCode is required' });
   }
-  
+
   const upperCode = userCode.toUpperCase();
-  
+
   if (!userCodes.has(upperCode)) {
     return res.status(400).json({ error: 'Invalid user code' });
   }
-  
+
   const chatId = userCodes.get(upperCode);
   let message = '';
 
-  switch(result) {
+  switch (result) {
     case 'win':
       if (!promoCode) {
         return res.status(400).json({ error: 'Promo code required for win' });
       }
       message = `🎉 <b>Поздравляем с победой!</b>\n\n🎁 Ваш промокод: <code>${promoCode}</code>\n\nСкопируйте его и используйте при оформлении заказа!`;
       break;
+
     case 'lose':
       message = '😔 <b>Проигрыш</b>\n\nНе расстраивайтесь! Попробуйте ещё раз — у вас обязательно получится! 💪';
       break;
+
     case 'draw':
       message = '🤝 <b>Ничья!</b>\n\nОтличная игра! Сыграйте ещё раз для новой попытки выиграть промокод.';
       break;
+
     default:
       return res.status(400).json({ error: 'Invalid result type' });
   }
@@ -163,6 +174,11 @@ app.post('/api/game/result', async (req, res) => {
   const telegramResult = await sendTelegramMessage(message, chatId);
   res.json(telegramResult);
 });
+
+// -------------------- START SERVER AND BOT --------------------
+
+bot.launch();
+console.log('🤖 Telegraf bot launched.');
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
