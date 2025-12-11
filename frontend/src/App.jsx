@@ -163,31 +163,9 @@ const TicTacToe = () => {
     setShowModal(false);
   };
 
-  // const startGame = () => {
-  //   if (chatId) {
-  //     setShowSettings(false);
-  //   }
-  // };
-
-  const startGame = async () => {
-    if (!chatId) return;
-
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/test-chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setShowSettings(false);
-      } else {
-        alert("Пожалуйста, отправьте /start нашему боту в Telegram, чтобы получать промокоды.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Ошибка подключения к боту. Попробуйте снова.");
+  const startGame = () => {
+    if (chatId) {
+      setShowSettings(false);
     }
   };
 
