@@ -115,5 +115,4 @@ app.post('/api/game/result', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Bot configured: ${!!(BOT_TOKEN && ADMIN_CHAT_ID)}`);
 });
